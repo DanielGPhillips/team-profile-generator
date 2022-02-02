@@ -4,7 +4,7 @@
   "description": "A command line application to generate profiles for team members within an organization.  Written as a part of the University of Washington Full-Stack Web Developer Coding Bootcamp.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
