@@ -1,91 +1,91 @@
 const inquirer = require('inquirer');
 const fs = require('fs');
-const path = require('path');
 
-// const Employee = require('./lib/Employee');
 const Manager = require('./lib/Manager');
 const Engineer = require('./lib/Engineer');
 const Intern = require('./lib/Intern');
-const generateTeam = require('./util/generateHtml');
-const questions = require('./util/questions');
-const OUTPUT_DIR = path.resolve(__dirname, "dist")
-const outputPath = path.join(OUTPUT_DIR, "team.html")
-const team = [];
-const needManager = true;
+const generateHtml = require('./util/generateHtml');
 
 
-const addNewMember = () => {
-    inquirer.prompt(questions.selectMemberType)
-        .then(answer => {
 
-            if (answer === "Manager") {
-                if (needManager) {
-                    inquirer.prompt(questions.Manager)
-                        .then(answer => {
-                            const manager = new Manager (
-                                answer.name, 
-                                answer.id, 
-                                answer.email,
-                                answer.phone
-                            );
+const baseQuestions = [
+    {
+        type: "input",
+        message: "Please input this team member's name: ",
+        name: "name"
+    },
+    {
+        type: "input",
+        message: "Please input this team member's ID number: ",
+        name: "id"
+    },
+    {
+        type: "input",
+        message: "Please input this team member's email address: ",
+        name: "email"
+    } 
+];
 
-                            team.push(manager);
-                            needManager = false;
-                            if (answer.addNew === "yes") {
-                                addNewMember();
-                            } else {
-                                generateTeam();
-                            }
-                        });
-                } else {
-                    console.log("You can only have one manager.");
-                    addNewMember();
-                }
-            }
+const officeNumberQuestion = [{
+    type: "input",
+    message: "Please input this team member's office number: ",
+    name: "officeNumber"
+}];
+const githubQuestion = [{
+    type: "input",
+    message: "Please input this team member's GitHub username: ",
+    name: "github"
+}];
+const schoolQuestion = [{
+    type: "input",
+    message: "Please input the name of the school this team member is attending: ",
+    name: "school"
+}];
 
-            else if (answer.memberType === "Engineer") {
-                inquirer.prompt(questions.Engineer) 
-                    .then(answer => {
-                        const engineer = new Engineer
-                            (
-                                answer.name,
-                                answer.id,
-                                answer.email,
-                                answer.gitHub
-                            );
-                        team.push(engineer);
-                        if (answer.addNew === "yes") {
-                            addNewMember();
-                        } else {
-                            generateTeam();
-                        };
-                    });
-            }
+const teamOptions = [{
+    type: "list",
+    prompt: "What would you like to do next?",
+    choices: ["Add engineer to team", "Add intern to team", "Finalize team"],
+    name: "teamPick"
+}];
 
-            else if (answer.memberType === "Intern") {
-                inquirer.prompt(questions.Intern) 
-                    .then(answer => {
-                        const intern = new Intern
-                            (
-                                answer.name,
-                                answer.id,
-                                answer.email,
-                                answer.scool
-                            );
-                        team.push(intern);
-                        if (answer.addNew === "yes") {
-                            addNewMember();
-                        } else {
-                            generateTeam();
-                        };
-                    });
-            }        
-        })
-};
+const App = async () => {
+    let team = [];
+    let keepLooping = true;
+    console.log("Follow the subsequent prompts to enter your team manager's information.");
+    const { name: managerName, id: managerId, email: managerEmail } = await inquirer.prompt(baseQuestions);
+    const { officeNumber } = await inquirer.prompt(officeNumberQuestion);
+    team.push(new Manager(managerName, managerId, managerEmail, officeNumber));
+    
+    do {
+        const { teamPick } = await inquirer.prompt(teamOptions);
+        switch(teamPick) {
+            case "Add engineer to team":
+                console.log("Follow the subsequent prompts to enter this engineer's information.");
+                const { name: engineerName, id: engineerId, email: engineerEmail } = await inquirer.prompt(baseQuestions);
+                const { github } = await inquirer.prompt(githubQuestion);
+                team.push(new Engineer(engineerName, engineerId, engineerEmail, github));
+                break;
+            case "Add intern to team":
+                console.log("Follow the subsequent prompts to enter this intern's information.");
+                const { name: internName, id: internId, email: internEmail } = await inquirer.prompt(baseQuestions);
+                const { school } = await inquirer.prompt(schoolQuestion);
+                team.push(new Intern(internName, internId, internEmail, school));
+                break;
+            default: 
+                console.log("Finalizing team.")
+                keepLooping = false;
+                break;
+        }
 
-addNewMember();
+    } while (keepLooping);
 
-function generate() {
-    fs.writeFileSync(outputPath, generateTeam(team), "utf-8");
-    process.exit(0);
+    fs.writeFile("./dist/team.html", generateHtml(team), (err) => {
+        if(err){
+          throw err;
+        }
+        console.log("Wrote team.html to dist directory.");
+    });
 }
+
+App();
