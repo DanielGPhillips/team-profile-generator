@@ -20,10 +20,10 @@ A command line application to generate profiles for team members within an organ
 Here is a screenshot of the generated HTML page:
 
 
-![Screenshot]('./assets/screenshot.png')
+![Screenshot](./assets/screenshot.png) 
 
 
-You can also watch a walkthrough of the application on [YouTube](https://www.youtube.com)
+You can also watch a walkthrough of the application on [YouTube](https://youtu.be/duK6D7vxLO8)
 
 ## Questions
 If you have any questions feel free to message me on GitHub!
